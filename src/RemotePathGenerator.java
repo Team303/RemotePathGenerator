@@ -3,6 +3,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Base64;
 
 import javax.swing.JFrame;
 import javax.swing.JRootPane;
@@ -24,10 +25,22 @@ public class RemotePathGenerator extends JFrame implements ITableListener, IRemo
 	boolean connected = false;
 	int genID = 1;
 
+	/*static {
+		System.loadLibrary("pathfinderjava.dll");
+	}*/
+	static {
+	  //  try {
+	    	System.load("C:\\Users\\Bradley\\workspace\\RemotePathGenerator\\pathfinderjava.dll");
+//	    } catch (UnsatisfiedLinkError e) {
+//	      System.err.println("Native code library failed to load.\n" + e);
+//	      System.exit(1);
+//	    }
+	  }
+	
 	public static void main(String[] args) {
 		NetworkTable.setClientMode();
 		NetworkTable.setTeam(303);
-		NetworkTable.setIPAddress("192.168.0.108"); //NT server address - will be RoboRIO's. TODO
+		NetworkTable.setIPAddress("192.168.43.158"); //NT server address - will be RoboRIO's. TODO
 		new RemotePathGenerator();
 	}
 
@@ -92,7 +105,7 @@ public class RemotePathGenerator extends JFrame implements ITableListener, IRemo
 		     ObjectOutputStream so = new ObjectOutputStream(bo);
 		     so.writeObject(trajectory);
 		     so.flush();
-		     serializedTrajectory = bo.toString();
+		     serializedTrajectory = new String(Base64.getEncoder().encode(bo.toByteArray()));
 		 } catch (Exception e) {
 		     System.out.println(e);
 		 }
@@ -102,7 +115,7 @@ public class RemotePathGenerator extends JFrame implements ITableListener, IRemo
 	public Waypoint[] deserializeWaypointArray(String serializedWaypoints) {
 		Waypoint[] waypoints = null; 
 		try {
-		     byte b[] = serializedWaypoints.getBytes(); 
+		     byte[] b = Base64.getDecoder().decode(serializedWaypoints.getBytes()); 
 		     ByteArrayInputStream bi = new ByteArrayInputStream(b);
 		     ObjectInputStream si = new ObjectInputStream(bi);
 		     waypoints = (Waypoint[]) si.readObject();

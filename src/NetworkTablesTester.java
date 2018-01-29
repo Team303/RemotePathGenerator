@@ -56,13 +56,17 @@ public class NetworkTablesTester {
 	
 		//}
 		
+		while (!Thread.interrupted()) {
+			Thread.sleep(100);
+		}
+		
 	}
 
 	public static Trajectory deserializeTrajectory(String serializedTrajectory) {
 		Trajectory trajectory = null; 
 		try {
-		     byte[] b = serializedTrajectory.getBytes(); 
-		     ByteArrayInputStream bi = new ByteArrayInputStream(b);
+			 byte[] b = Base64.getDecoder().decode(serializedTrajectory.getBytes()); 
+			 ByteArrayInputStream bi = new ByteArrayInputStream(b);
 		     ObjectInputStream si = new ObjectInputStream(bi);
 		     trajectory = (Trajectory) si.readObject();
 		 } catch (Exception e) {
@@ -78,7 +82,7 @@ public class NetworkTablesTester {
 		     ObjectOutputStream so = new ObjectOutputStream(bo);
 		     so.writeObject(waypoints);
 		     so.flush();
-		     serializedWaypoints = bo.toString();
+		     serializedWaypoints = new String(Base64.getEncoder().encode(bo.toByteArray()));
 		 } catch (Exception e) {
 		     e.printStackTrace();
 		 }
