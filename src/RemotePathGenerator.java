@@ -62,10 +62,7 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 			genID++;
 		}
 
-		if(!display.getBackground().equals(Color.BLACK)) { 
-			display.setBackground(Color.GREEN);
-		}
-		
+		display.setBackground(Color.GREEN);
 	}
 
 	public Trajectory[] generatePaths(Waypoint[][] waypoints2d, double timeStep, double maxVel, double maxAccel, double maxJerk) {
@@ -78,7 +75,10 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 			try {
 				Waypoint[] waypoints = waypoints2d[i];
 				trajectories[i] = Pathfinder.generate(waypoints, config);
-			} catch (Exception e) {display.setBackground(Color.BLACK);}
+			} catch (Exception e) {
+				display.setBackground(Color.BLACK); 
+				display.setTitle(e.getMessage());
+			}
 		}
 		
 		return trajectories;

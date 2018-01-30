@@ -28,7 +28,9 @@ public class DisplayFrame extends JFrame{
 	 * 		<li>BLACK: Fatal error, one or more trajectories failed to generate</li> 
 	 */
 	public void setBackground(Color color) {
-		this.getContentPane().setBackground(color);
+		if(getBackground()!=Color.BLACK) {
+			this.getContentPane().setBackground(color);			
+		}
 	}
 	
 	public Color getBackground() {

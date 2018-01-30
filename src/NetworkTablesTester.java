@@ -46,15 +46,15 @@ public class NetworkTablesTester {
 		pathfinderInputTable.putString("waypoints", serializeWaypointArray2d(new Waypoint[][] {
 			{//this is waypoints[0], and will output to trajectories[0]
 				new Waypoint(0, 0, 0), 
-				new Waypoint(0, 0, 0), //this point is waypoints[0, 1]
-				new Waypoint(0, 0, 0)
+				new Waypoint(1, 0, 0), //this point is waypoints[0, 1]
+				new Waypoint(3, 0, 0)
 			}, {
 				new Waypoint(0, 0, 0), //this point is waypoints[1, 0]
-				new Waypoint(0, 0, 0)
+				new Waypoint(1, 0, 0)
 			}, {//this is waypoints[2] and will output to trajectories[2]
 				new Waypoint(0, 0, 0),
-				new Waypoint(0, 0, 0),
-				new Waypoint(0, 0, 0)
+				new Waypoint(1, 0, 0),
+				new Waypoint(2, 0, 0)
 			}
 		}));
 
