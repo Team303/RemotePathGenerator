@@ -28,7 +28,7 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 	public static void main(String[] args) {
 		NetworkTable.setClientMode();
 		NetworkTable.setTeam(303);
-		NetworkTable.setIPAddress("127.0.0.1"); //NT server address - will be RoboRIO's.
+		NetworkTable.setIPAddress("10.3.3.2"); //NT server address - will be RoboRIO's.
 		new RemotePathGenerator();
 	}
 
