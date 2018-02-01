@@ -60,8 +60,10 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 			pathfinderOutputTable.putValue("ID", genID);
 			System.out.println("client sent data and genID "+genID);
 			genID++;
+			for(int i = 0; i < trajectories[0].segments.length; i++) {
+				System.out.println(i + ") x: " + trajectories[0].segments[i].x + " y: " + trajectories[0].segments[i].y + " heading: " + Pathfinder.r2d(trajectories[0].segments[i].heading));
+			}
 		}
-
 		display.setBackground(Color.GREEN);
 	}
 
