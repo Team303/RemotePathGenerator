@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
-
+/**
+ * Class designed to test construction of Trajectories 
+ */
 public class NetworkTablesTester {
 
 	public static final double timeStep = 0.05;

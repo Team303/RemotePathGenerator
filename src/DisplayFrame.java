@@ -13,7 +13,7 @@ public class DisplayFrame extends JFrame{
 		this.setAlwaysOnTop(true);
 		this.setUndecorated(true);
 		this.getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
-		//this.setOpacity(0.5f);
+		this.setOpacity(0.5f);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
