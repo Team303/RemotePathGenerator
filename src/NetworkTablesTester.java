@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
+import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
@@ -45,20 +46,21 @@ public class NetworkTablesTester {
 		pathfinderInputTable.putNumber("maxAccel", maxAccel);
 		pathfinderInputTable.putNumber("maxJerk", maxJerk);
 
-		pathfinderInputTable.putString("waypoints", serializeWaypointArray2d(new Waypoint[][] {
-			{//this is waypoints[0], and will output to trajectories[0]
-				new Waypoint(0, 0, 0), 
-				new Waypoint(1, 0, 0), //this point is waypoints[0, 1]
+		HashMap<String, Waypoint[]> waypointArrayMap = new HashMap<>(); 
+
+		waypointArrayMap.put("this is where the path name goes", new Waypoint[] {
+				new Waypoint(0, 0, 0),
+				new Waypoint(1, 0, 0),
 				new Waypoint(3, 0, 0)
-			}, {
-				new Waypoint(0, 0, 0), //this point is waypoints[1, 0]
-				new Waypoint(1, 0, 0)
-			}, {//this is waypoints[2] and will output to trajectories[2]
+		});
+
+		waypointArrayMap.put("insert another name here", new Waypoint[] {
 				new Waypoint(0, 0, 0),
 				new Waypoint(1, 0, 0),
 				new Waypoint(2, 0, 0)
-			}
-		}));
+		});
+
+		pathfinderInputTable.putString("waypoints", serializeWaypointArrayMap(waypointArrayMap));
 
 		NetworkTable.flush();
 
@@ -68,31 +70,31 @@ public class NetworkTablesTester {
 
 	}
 
-	public static Trajectory[] deserializeTrajectoryArray(String serializedTrajectoryArray) {
-		Trajectory[] trajectories = null; 
+	public static HashMap<String, Trajectory> deserializeTrajectoryMap(String serializedTrajectoryMap) {
+		HashMap<String, Trajectory> trajectories = null; 
 		try {
-			byte[] b = Base64.getDecoder().decode(serializedTrajectoryArray.getBytes()); 
+			byte[] b = Base64.getDecoder().decode(serializedTrajectoryMap.getBytes()); 
 			ByteArrayInputStream bi = new ByteArrayInputStream(b);
 			ObjectInputStream si = new ObjectInputStream(bi);
-			trajectories = (Trajectory[]) si.readObject();
+			trajectories = (HashMap<String, Trajectory>) si.readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return trajectories;
 	}
 
-	public static String serializeWaypointArray2d(Waypoint[][] waypoints2d) {
-		String serializedWaypoints = "";
+	public static String serializeWaypointArrayMap(HashMap<String, Waypoint[]> waypointArrayMap) {
+		String serializedWaypointMap = "";
 		try {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream();
 			ObjectOutputStream so = new ObjectOutputStream(bo);
-			so.writeObject(waypoints2d);
+			so.writeObject(waypointArrayMap);
 			so.flush();
-			serializedWaypoints = new String(Base64.getEncoder().encode(bo.toByteArray()));
+			serializedWaypointMap = new String(Base64.getEncoder().encode(bo.toByteArray()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return serializedWaypoints;
+		return serializedWaypointMap;
 	}
 
 }

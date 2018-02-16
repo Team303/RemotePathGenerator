@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JRootPane;
@@ -46,39 +48,41 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 
 		if(string.equals("waypoints")) {
 			display.setBackground(Color.YELLOW);
-			Waypoint[][] waypoints2d = deserializeWaypointArray2d((String)recievedObject);
+			HashMap<String, Waypoint[]> waypointArrayMap = deserializeWaypointArrayMap((String)recievedObject);
 			double timeStep = pathfinderInputTable.getNumber("timeStep", 0.05);
 			double maxVel = pathfinderInputTable.getNumber("maxVel", 10);
 			double maxAccel  = pathfinderInputTable.getNumber("maxAccel", 20);
 			double maxJerk = pathfinderInputTable.getNumber("maxJerk", 30);
 			
-			Trajectory[] trajectories = generatePaths(waypoints2d, timeStep, maxVel, maxAccel, maxJerk);
+			HashMap<String, Trajectory> trajectories = generatePaths(waypointArrayMap, timeStep, maxVel, maxAccel, maxJerk);
 
 			//output results to NT
 			//genID is used for verification that the data is new, since if the same path object is output then valueChanged() doesn't fire.
-			pathfinderOutputTable.putValue("path", serializeTrajectoryArray(trajectories));
+			//genID is probably not needed
+			pathfinderOutputTable.putValue("path", serializeTrajectoryMap(trajectories));
 			pathfinderOutputTable.putValue("ID", genID);
 			System.out.println("client sent data and genID "+genID);
 			genID++;
-			for(int i = 0; i < trajectories[0].segments.length; i++) {
-				System.out.printf("%d) x: %.2f y: %.2f heading: %.2f velocity: %.2f acceleration: %.2f jerk: %.2f \n" + "", i, trajectories[0].segments[i].x, trajectories[0].segments[i].y, Pathfinder.r2d(trajectories[0].segments[i].heading), trajectories[0].segments[i].velocity, trajectories[0].segments[i].acceleration,  trajectories[0].segments[i].jerk);
-			}
+			
+		//	for(int i = 0; i < trajectories; i++) {
+		//		System.out.printf("%d) x: %.2f y: %.2f heading: %.2f velocity: %.2f acceleration: %.2f jerk: %.2f \n" + "", i, trajectories[0].segments[i].x, trajectories[0].segments[i].y, Pathfinder.r2d(trajectories[0].segments[i].heading), trajectories[0].segments[i].velocity, trajectories[0].segments[i].acceleration,  trajectories[0].segments[i].jerk);
+		//	}
 		}
 		display.setBackground(Color.GREEN);
 	}
 
-	public Trajectory[] generatePaths(Waypoint[][] waypoints2d, double timeStep, double maxVel, double maxAccel, double maxJerk) {
+	public HashMap<String, Trajectory> generatePaths(HashMap<String, Waypoint[]> waypointArrayMap, double timeStep, double maxVel, double maxAccel, double maxJerk) {
 		Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH,
 				timeStep, maxVel, maxAccel, maxJerk);
 		
-		//first dimension of waypoints2d is what will be a trajectory, the second dimension is the waypoints in that trajectory
-		Trajectory[] trajectories = new Trajectory[waypoints2d.length];
-		for(int i=0;i<trajectories.length;i++) {
+		HashMap<String, Trajectory> trajectories = new HashMap<String, Trajectory>(waypointArrayMap.size());
+		
+		Set<String> keys = waypointArrayMap.keySet();
+		for(String key : keys) {
 			try {
-				Waypoint[] waypoints = waypoints2d[i];
-				trajectories[i] = Pathfinder.generate(waypoints, config);
+				trajectories.put(key, Pathfinder.generate(waypointArrayMap.get(key), config));
 			} catch (Exception e) {
-				display.setBackground(Color.BLACK); 
+				display.setBackground(Color.BLACK);
 				display.setTitle(e.getMessage());
 			}
 		}
@@ -86,32 +90,31 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 		return trajectories;
 	}
 
-	public String serializeTrajectoryArray(Trajectory[] trajectoryArray) {
-		String serializedTrajectoryArray = ""; 
-		
+	public String serializeTrajectoryMap(HashMap<String, Trajectory> trajectoryMap) {
+		String serializedTrajectoryMap = "";
 		try {
 		     ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		     ObjectOutputStream so = new ObjectOutputStream(bo);
-		     so.writeObject(trajectoryArray);
+		     so.writeObject(trajectoryMap);
 		     so.flush();
-		     serializedTrajectoryArray = new String(Base64.getEncoder().encode(bo.toByteArray()));
+		     serializedTrajectoryMap = new String(Base64.getEncoder().encode(bo.toByteArray()));
 		 } catch (Exception e) {
 		     System.out.println(e);
 		 }
-		return serializedTrajectoryArray;
+		return serializedTrajectoryMap;
 	}
-
-	public Waypoint[][] deserializeWaypointArray2d(String serializedWaypointsArray2d) {
-		Waypoint[][] waypoints2d = null; 
+	
+	public HashMap<String, Waypoint[]> deserializeWaypointArrayMap(String serializedWaypointArrayMap) {
+		HashMap<String, Waypoint[]> waypointArrayMap = null; 
 		try {
-		     byte[] b = Base64.getDecoder().decode(serializedWaypointsArray2d.getBytes()); 
+		     byte[] b = Base64.getDecoder().decode(serializedWaypointArrayMap.getBytes()); 
 		     ByteArrayInputStream bi = new ByteArrayInputStream(b);
 		     ObjectInputStream si = new ObjectInputStream(bi);
-		     waypoints2d = (Waypoint[][]) si.readObject();
+		     waypointArrayMap = (HashMap<String, Waypoint[]>) si.readObject();
 		 } catch (Exception e) {
 		     System.out.println(e);
 		 }
-		return waypoints2d;
+		return waypointArrayMap;
 	}
 	
 	@Override
