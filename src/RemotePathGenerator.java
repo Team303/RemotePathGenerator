@@ -44,29 +44,19 @@ public class RemotePathGenerator implements ITableListener, IRemoteConnectionLis
 
 	@Override
 	public void valueChanged(ITable iTable, String string, Object recievedObject, boolean newValue) {
-		System.out.println("[client recieved] String: "+string+" Value: "+recievedObject+" new: "+newValue);
-
+	
 		if(string.equals("waypoints")) {
 			display.setBackground(Color.YELLOW);
 			HashMap<String, Waypoint[]> waypointArrayMap = deserializeWaypointArrayMap((String)recievedObject);
-			double timeStep = pathfinderInputTable.getNumber("timeStep", 0.05);
-			double maxVel = pathfinderInputTable.getNumber("maxVel", 10);
-			double maxAccel  = pathfinderInputTable.getNumber("maxAccel", 20);
-			double maxJerk = pathfinderInputTable.getNumber("maxJerk", 30);
+
+			double timeStep = 0.02;
+			double maxVel = 6.5;
+			double maxAccel = 20;
+			double maxJerk = 50;
 			
 			HashMap<String, Trajectory> trajectories = generatePaths(waypointArrayMap, timeStep, maxVel, maxAccel, maxJerk);
 
-			//output results to NT
-			//genID is used for verification that the data is new, since if the same path object is output then valueChanged() doesn't fire.
-			//genID is probably not needed
 			pathfinderOutputTable.putValue("path", serializeTrajectoryMap(trajectories));
-			pathfinderOutputTable.putValue("ID", genID);
-			System.out.println("client sent data and genID "+genID);
-			genID++;
-			
-		//	for(int i = 0; i < trajectories; i++) {
-		//		System.out.printf("%d) x: %.2f y: %.2f heading: %.2f velocity: %.2f acceleration: %.2f jerk: %.2f \n" + "", i, trajectories[0].segments[i].x, trajectories[0].segments[i].y, Pathfinder.r2d(trajectories[0].segments[i].heading), trajectories[0].segments[i].velocity, trajectories[0].segments[i].acceleration,  trajectories[0].segments[i].jerk);
-		//	}
 		}
 		display.setBackground(Color.GREEN);
 	}
